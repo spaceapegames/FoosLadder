@@ -61,6 +61,7 @@ this.loadMatches = function()
 this.setMatches = function(data)
 {
 	matches = data;
+	matches = matches.sort(function(a,b){return b.timestamp - a.timestamp})
 	table.setLoading(false);
 	table.clear();
 	
@@ -82,37 +83,35 @@ this.setMatches = function(data)
 
 function fillRowWithMatch(tableRow, match)
 {
-	var date = new Date(match.date);
 	var cellIdx = 1;
+	var change = -1;
+	if(match.defeat) 
+	{
+		change = 1;
+	}
+	match.KDleft = change;
+	match.leftScore = match.defeat ? 1 : 0;
+	match.rightScore = match.defeat ? 0 : 1;
+	
 	var change = Math.round(Number(match.KDleft)*100)/100;
 	var colors = [ '#1A1', '#E55' ];
 	
 	var leftScoreChange = getChildByTag(tableRow, "leftScoreChange");
 	leftScoreChange.style.cssText = 'color: '+colors[change > 0 ? 0 : 1];
 	setContentsOfTag(tableRow, "leftScoreChange", change);
-	setContentsOfTag(tableRow, "leftAttacker", getPlayerNameFromId(match.leftPlayers[0]));
-	setContentsOfTag(tableRow, "leftDefender", match.leftPlayers.length > 1 ? getPlayerNameFromId(match.leftPlayers[1]) : "");
+	setContentsOfTag(tableRow, "leftAttacker", match.attackerClide);
 	setContentsOfTag(tableRow, "leftScore", match.leftScore);
 	
 	var rightScoreChange = getChildByTag(tableRow, "rightScoreChange");
 	rightScoreChange.style.cssText = 'color: '+colors[change > 0 ? 1 : 0];
 	setContentsOfTag(tableRow, "rightScoreChange", -change);
-	setContentsOfTag(tableRow, "rightAttacker", getPlayerNameFromId(match.rightPlayers[0]));
-	setContentsOfTag(tableRow, "rightDefender", match.rightPlayers.length > 1 ? getPlayerNameFromId(match.rightPlayers[1]) : "");
+	setContentsOfTag(tableRow, "rightAttacker", match.defenderClide);
 	setContentsOfTag(tableRow, "rightScore", match.rightScore);
 	
+	
+	var date = new Date(match.timestamp);
 	var dateStr = date.getDate() + ", "+ (date.getMonth()+1) + ", " + date.getFullYear() + "<br/>" + doubleDigit(date.getHours()) + ":" + doubleDigit(date.getMinutes());
 	setContentsOfTag(tableRow, "matchDate", dateStr);
-	
-	var matchId = match._id;
-	tableRow.id = "match-"+matchId;
-	var commentCount = getChildByTag(tableRow, "commentToggle");
-	commentCount.innerHTML = getCommentCountNodeString("match/"+matchId);
-	FB.XFBML.parse(commentCount);
-	
-	$(tableRow).click(function() {
-		self.toggleMatchBox(matchId);
-	});
 }
 
 

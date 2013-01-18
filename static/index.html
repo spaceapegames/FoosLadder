@@ -26,8 +26,6 @@
 <script type="text/javascript" src="js/graphView.js"></script>
 <script type="text/javascript" src="js/liveView.js"></script>
 
-<script src="//connect.facebook.net/en_US/all.js"></script>
-
 <script type="text/javascript">
 var matchesView;
 var playersView;
@@ -107,7 +105,7 @@ function onLoad()
 function loadPlayers()
 {
 	playersView.onReloading();
-	callAPI({request:"getPlayers"}, self.onPlayersLoaded);
+	callAPI({request:"stats"}, self.onPlayersLoaded);
 }
 
 function onPlayersLoaded(players)
@@ -124,12 +122,7 @@ function loadMatches()
 	matchesView.onReloading();
 	graphView.onReloading();
 	
-	var request = {request:"getMatches", descending:true};
-	
-	if(!shouldLoadAllMatches)
-	{
-		request.limit = 200;
-	}
+	var request = {request:"list", descending:true};
 	
 	$(".loadAllMatches").hide();
 	callAPI(request, onMatchesLoaded);
@@ -137,7 +130,6 @@ function loadMatches()
 
 function loadAllMatches()
 {
-	shouldLoadAllMatches = true;
 	loadMatches();
 }
 
@@ -233,6 +225,7 @@ function setCurrentView(view)
 </script>
 </head> 
 <body onLoad="onLoad()"> 
+<div id="ajax"></div>
 <div id="fb-root"></div>
     <div class="container-narrow">
     
@@ -240,10 +233,9 @@ function setCurrentView(view)
         <a class="brand" style="font-weight:bold">Foos Ladder</a>
         <ul class="nav">
           <li id="matchesMenu"><a href="javascript:showMatches()" >Matches</a></li>
-          <li id="addMatchesMenu"><a href="javascript:showAddMatch()">Add Match</a></li>
           <li id="playersMenu"><a href="javascript:showPlayers()">Players</a></li>
-          <li id="graphMenu"><a href="javascript:showGraph()">Graph</a></li>
           <!--
+          <li id="graphMenu"><a href="javascript:showGraph()">Graph</a></li>
           <li id="liveMenu"><a href="javascript:showLive()">Live</a></li>
           -->
         </ul>
@@ -252,7 +244,7 @@ function setCurrentView(view)
 <div class="body">
 <table class="table table-condensed table-hover table-striped" id="matchesTable" >
   <tr>
-    <th>&nbsp;</th>
+    <th><a class="btn btn-link loadAllMatches" href="javascript:loadAllMatches()">Reload</a></th>
     <th colspan="2" class="rightCell">Yellow</th>
     <th>&nbsp;</th>
     <th colspan="2">White</th>
@@ -261,13 +253,11 @@ function setCurrentView(view)
   <tr id="sampleRow" style="cursor: pointer;">
     <td class="tiny" style="width:80px"><matchDate>1, 1, 2012<br />18:00</matchDate></td>
     <td class="rightCell" style="width:60px"><leftScoreChange>11</leftScoreChange></td>
-    <td class="rightCell"><leftAttacker>Left Attacker</leftAttacker><br />
-    <leftDefender>Left Defender</leftDefender></td>
+    <td class="rightCell"><leftAttacker>Left Attacker</leftAttacker></td>
     <td style="width:60px" class="centerCell"><leftScore>10</leftScore> - <rightScore>9</rightScore></td>
-    <td><rightAttacker>Right Attacker</rightAttacker><br />
-    <rightDefender>Right Defender</rightDefender></td>
+    <td><rightAttacker>Right Attacker</rightAttacker></td>
     <td style="width:60px"><rightScoreChange>-11</rightScoreChange></td>
-    <td class="rightCell" style="width:80px"><commentToggle>? <i class="icon-comment"></i></commentToggle></td>
+    <td class="rightCell" style="width:80px"></td>
   </tr>
   <tr id="loadingRow">
     <td colspan="7" class="loadingCell">Getting matches...</td>
@@ -279,7 +269,7 @@ function setCurrentView(view)
   </tr>
   <tr>
     <td colspan="7" class="centerCell">
-    <a class="btn btn-link loadAllMatches" href="javascript:loadAllMatches()"><i class="icon-download"></i> Load all matches</a>
+    <a class="btn btn-link loadAllMatches" href="javascript:loadAllMatches()"><i class="icon-download"></i> Reload matches</a>
     </td>
   </tr>
 </table>
@@ -287,56 +277,29 @@ function setCurrentView(view)
 
 <table class="table table-bordered table-condensed table-hover table-striped" id="playersTable" >
   <tr>
-    <td colspan="8">
+    <td colspan="4">
       <div class="btn-group">
-      	<a class="btn btn-small" href="javascript:playersView.addPlayer()"><i class="icon-plus-sign"></i> Add player</a>
       	<a class="btn btn-small" href="javascript:loadPlayers()"><i class="icon-refresh"></i> Reload</a>
-      </div>
-      <div class="btn-group fbLoggedIn">
-      	<a class="btn btn-small" href="javascript:playersView.rebuiltStats()"><i class="icon-repeat"></i> Rebuild stats</a>
-        <a class="btn btn-small" href="javascript:playersView.repeatMatches()"><i class="icon-fast-forward"></i> Repeat matches</a>
       </div>
     </td>
   </tr>
   <tr id="headerRow">
     <th ><a href="javascript:playersView.toggleSortBy('name')">Name</a></th>
-    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.rating')">overall<br>
-    rating</a></th>
-    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.offence')">offence<br />
-    rating</a></th>
-    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.defence')">defence<br />
-    rating</a></th>
-    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.solo')">solo<br />
-    rating</a></th>
-    <th ><a href="javascript:playersView.toggleSortBy('stats.elo.mixed.score')">(old) rating</a></th>
-    <th >duo<br />
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.duo.wins')">wins </a>
-    /
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.duo.games')">games</a>
-    /
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.duo.kdr')">kdr</a></th>
-    <th >solo<br />
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.solo.wins')">win</a>
-    /
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.solo.games')"> games</a>
-    /
-    <a href="javascript:playersView.toggleSortBy('stats.kdr.solo.kdr')">kdr</a></th>
+    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.rating')">Wins</a></th>
+    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.offence')">Losses</a></th>
+    <th ><a href="javascript:playersView.toggleSortBy('stats.avg.defence')">Total</a></th>
   </tr>
   <tr id="sampleRow">
     <td  style="text-align:left"><playerImage></playerImage> <playerName>NAME</playerName></td>
-    <td ><rating path="stats.avg.rating">3</rating></td>
-    <td ><rating path="stats.avg.offence">3</rating></td>
-    <td ><rating path="stats.avg.defence">3</rating></td>
-    <td ><rating path="stats.avg.solo">3</rating></td>
-    <td ><rating path="stats.elo.mixed.score">3</rating></td>
-    <td ><duoWins>2/3/0.5</duoWins></td>
-    <td ><soloWins>2/2/0.5</soloWins></td>
+    <td ><playerWins>3</playerWins></td>
+    <td ><playerLosses>3</playerLosses></td>
+    <td ><playerGames>3</playerGames></td>
   </tr>
   <tr id="loadingRow">
-    <td colspan="8" class="loadingCell">Getting players...</td>
+    <td colspan="4" class="loadingCell">Getting players...</td>
   </tr>
   <tr>
-    <td colspan="8" class="commentCell">
+    <td colspan="4" class="commentCell">
     </td>
   </tr>
 </table>

@@ -7,18 +7,54 @@ var facebookAccessToken;
 function callAPI(postdata, callback)
 {
 	if(!postdata.request) return;
-	$.post(getAPIPath(postdata.request),
+	
+	var url = getAPIPath(postdata.request);
+	
+	
+	$.get(url,
 		postdata,
 		function(data)
 		{
 			callback(data);
 		},
 		"json");
+		
+	return;
+		
+		
+	$.getJSON( url, postdata,  
+                function(json) {  
+                    var result = "Language code is \"<strong>" + json.responseData.language + "\"";  
+                    alert(result);
+                }  
+            ); 
+	
+	return;
+	
+	$("#ajax").load(url,function(responseTxt,statusTxt,xhr){
+    if(statusTxt=="success")
+      alert("External content loaded successfully!");
+    if(statusTxt=="error")
+      alert("Error: "+xhr.status+": "+xhr.statusText);
+  });
+	
+	$.ajax({
+		type: "GET",
+		url: getAPIPath(postdata.request),
+		dataType: "jsonp",
+		success: function(data)
+		{
+			alert(data);
+			callback(data);
+		},
+	}).done(function() {
+			alert(this);
+	});;
 }
 
 function getAPIPath(apistring)
 {
-	return getServerRoot() + "api?"+(new Date().getTime());	
+	return API_PATH + apistring;	
 }
 
 function getServerRoot()

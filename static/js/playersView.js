@@ -15,7 +15,6 @@ table.setLoading(true);
 this.show = function()
 {
 	table.element.show();
-	addFBCommentsIfRequired();
 	if(players == null)
 	{
 		self.loadPlayers();
@@ -35,7 +34,7 @@ this.onReloading = function()
 
 this.loadPlayers = function()
 {
-	callAPI({request:"getPlayers"}, onPlayersLoaded);
+	callAPI({request:"stats"}, onPlayersLoaded);
 }
 
 this.setPlayers = function(data)
@@ -75,33 +74,15 @@ function updateRows()
 
 function fillRowWithUser(tableRow, user)
 {
-	if(user.stats == null) user.stats = {};
-	var kdr = user.stats.kdr;
-	var versus = user.stats.versus;
+	var userLink = user.clide;
 	
-	var userLink = "<a href='javascript:inspect(\""+user.id+"\")'>"+user.name+"</a>";
-	
-	var goalsFor = Number(kdr.mixed.goalsFor);
-	var goalsAgainst = Number(kdr.mixed.goalsAgainst);
-	var goalAvg = Math.round(kdr.mixed.goalAvg*100) / 100;
-	if (isNaN(goalAvg)) goalAvg = "-";
-	
-	var stats = user.stats;
 	
 	var image = getPlayerImageElement(user, 30);
 	var row = $(tableRow);
-	row.find("playerImage").replaceWith(image);
 	setContentsOfTag(tableRow, "playerName", userLink);
-	setContentsOfTag(tableRow, "duoWins", safeSlashNum(stats.kdr.duo.wins, stats.kdr.duo.games, stats.kdr.duo.kdr));
-	setContentsOfTag(tableRow, "soloWins", safeSlashNum(stats.kdr.solo.wins, stats.kdr.solo.games, stats.kdr.solo.kdr));
-	
-	var ratingtags = row.find("rating");
-	ratingtags.each(function(index)
-	{
-		var ratingtag = $(this);
-		var str = safeStr(readPropertyChainStr(user, String(ratingtag.attr("path"))));
-		ratingtag.text(str);
-	});
+	setContentsOfTag(tableRow, "playerWins", user.wins);
+	setContentsOfTag(tableRow, "playerLosses", user.loses);
+	setContentsOfTag(tableRow, "playerGames", user.wins + user.loses);
 }
 
 function safeStr(obj, decimals)
