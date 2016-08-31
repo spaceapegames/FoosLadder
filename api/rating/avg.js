@@ -52,8 +52,8 @@ function Avg()
 	function updatePlayerMixedRating(player)
 	{
 		var stat = getPlayerStatObj(player);
-		var avg = (stat.offence + stat.defence + stat.solo) / 3;
-		var max = Math.max(stat.offence, stat.defence, stat.solo);
+		var avg = (stat.offence + stat.defence) / 2;
+		var max = Math.max(stat.offence, stat.defence);
 		stat.rating = ((max * MIXED_RATING_MAX_RATIO) + ( avg * (1 - MIXED_RATING_MAX_RATIO)));
 	}
 	
