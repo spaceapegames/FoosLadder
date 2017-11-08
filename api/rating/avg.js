@@ -52,9 +52,11 @@ function Avg()
 	function updatePlayerMixedRating(player)
 	{
 		var stat = getPlayerStatObj(player);
-		var avg = (stat.offence + stat.defence + stat.solo) / 3;
+		// var avg = (stat.offence + stat.defence + stat.solo) / 3;
+		var avg = (stat.offence + stat.defence) / 2;
 		var max = Math.max(stat.offence, stat.defence, stat.solo);
-		stat.rating = ((max * MIXED_RATING_MAX_RATIO) + ( avg * (1 - MIXED_RATING_MAX_RATIO)));
+		// stat.rating = ((max * MIXED_RATING_MAX_RATIO) + ( avg * (1 - MIXED_RATING_MAX_RATIO)));
+		stat.rating = avg
 	}
 	
 	function getLeftRatingChange(playersById, leftPlayerIds, leftScore, rightPlayerIds, rightScore)
@@ -106,11 +108,11 @@ function Avg()
 		var initialExperience = player.initialExperience;
 		if(initialExperience == 1)
 		{
-			return 1500;
+			return 1600;
 		}
 		else if(initialExperience == 3)
 		{
-			return 1700;
+			return 1600;
 		}
 		return 1600;
 	}
